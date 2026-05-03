@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lê Khoa — Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #1e1e1e; --sand: #2a2a2a; --ink: #f0f0f0; --ink-soft: #c8c8c8;
+    --gold: #b8935a; --white: #252525; --muted: #888888;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --nav-h: 64px;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--cream); color: var(--ink); font-family: var(--font-body);
+    font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h);
+    background: rgba(30,30,30,0.95); backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(184,147,90,0.15);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+  }
+  .nav-logo {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--ink); }
+  .nav-tabs { display: flex; gap: 8px; list-style: none; }
+  .nav-tabs li button {
+    font-family: var(--font-body); font-size: 0.78rem; font-weight: 400;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    background: none; border: none; cursor: pointer; padding: 6px 16px;
+    border-radius: 2px; transition: color 0.2s, background 0.2s;
+  }
+  .nav-tabs li button.active, .nav-tabs li button:hover
+    { color: var(--ink); background: rgba(184,147,90,0.1); }
+
+  /* ── TABS ── */
+  .tab-panel { display: none; padding-top: var(--nav-h); min-height: 100vh; }
+  .tab-panel.active { display: block; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── SLIDESHOW ── */
+  .slideshow-label { padding: 48px 40px 24px; }
+  .eyebrow { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .slideshow-label h2 { font-family: var(--font-display); font-size: clamp(1.8rem,4vw,3rem); font-weight: 400; line-height: 1.15; color: var(--ink); }
+  .slideshow-wrapper { position: relative; width: 100%; overflow: hidden; background: #000; touch-action: pan-y; user-select: none; }
+  .slideshow-track { display: flex; transition: transform 0.65s cubic-bezier(0.77,0,0.175,1); will-change: transform; }
+  .slide { min-width: 100%; position: relative; }
+  .slide img { width: 100%; height: clamp(320px,58vw,680px); object-fit: contain; display: block; background: #000; }
+  .img-placeholder { width: 100%; height: clamp(320px,58vw,680px);
+    background: #111; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: var(--muted); gap: 12px; }
+  .img-placeholder svg { width: 36px; height: 36px; opacity: 0.3; }
+  .img-placeholder span { font-size: 0.8rem; letter-spacing: 0.1em; opacity: 0.5; }
+  .slide-caption { position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 64px 40px 28px;
+    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%); }
+  .slide-caption .slide-name { font-family: var(--font-display); font-size: clamp(1rem,2.5vw,1.6rem); font-weight: 400; color: #fff; letter-spacing: 0.02em; }
+  .slide-controls { position: absolute; top: 50%; transform: translateY(-50%);
+    width: 100%; display: flex; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 10; }
+  .slide-btn { pointer-events: all; width: 44px; height: 44px;
+    background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
+    transition: background 0.2s, transform 0.15s; backdrop-filter: blur(8px); }
+  .slide-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.08); }
+  .slide-btn svg { width: 18px; height: 18px; color: #fff; }
+  .slide-dots { display: flex; justify-content: center; gap: 7px; padding: 14px; background: var(--cream); flex-wrap: wrap; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #444;
+    border: 1.5px solid #666; cursor: pointer; transition: background 0.2s, transform 0.2s; }
+  .dot.active { background: var(--gold); border-color: var(--gold); transform: scale(1.25); }
+
+  /* ── PROJECT INFO ── */
+  .project-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    border-top: 1px solid rgba(184,147,90,0.2); margin: 0 40px; padding: 32px 0 40px; }
+  .info-cell { padding: 0 24px 20px 16px; border-right: 1px solid rgba(184,147,90,0.2); }
+  .info-cell:first-child { padding-left: 0; }
+  .info-cell:last-child { border-right: none; }
+  .info-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .info-value { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.55; }
+  .scope-list { list-style: none; font-size: 0.82rem; color: var(--muted); line-height: 1.95; }
+  .scope-list li::before { content: '— '; color: var(--gold); }
+  .section-divider { height: 1px; background: linear-gradient(to right,transparent,rgba(184,147,90,0.3),transparent); margin: 0 40px 40px; }
+  .section-heading { padding: 0 40px 24px; }
+  .section-heading h3 { font-family: var(--font-display); font-size: clamp(1.4rem,3vw,2.2rem); font-weight: 400; color: var(--ink); }
+
+  /* ── CV ── */
+  #tab-cv { background: var(--white); }
+  .cv-container { max-width: 780px; margin: 0 auto; padding: 64px 40px 80px; }
+  .cv-name { font-family: var(--font-body); font-size: clamp(1.6rem,4vw,2.4rem); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); margin-bottom: 4px; }
+  .cv-title { font-size: 0.85rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 48px; }
+  .cv-section { margin-bottom: 36px; }
+  .cv-section-title { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid rgba(184,147,90,0.25); padding-bottom: 8px; margin-bottom: 16px; }
+  .cv-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; margin-bottom: 10px; align-items: baseline; }
+  .cv-year { font-size: 0.78rem; color: var(--gold); letter-spacing: 0.06em; padding-top: 2px; }
+  .cv-text { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.65; }
+  .cv-plain { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.8; }
+
+  /* ── WRITING ── */
+  .writing-container { max-width: 920px; margin: 0 auto; padding: 64px 40px 80px; }
+  .writing-header { margin-bottom: 36px; }
+  .writing-header h2 { font-family: var(--font-display); font-size: clamp(2rem,4vw,3rem); font-weight: 400; color: var(--ink); }
+
+  /* Article list */
+  .article-list { display: flex; flex-direction: column; }
+  .article-item {
+    display: grid; grid-template-columns: 80px 1fr; gap: 24px; padding: 22px 0;
+    border-bottom: 1px solid rgba(184,147,90,0.15); cursor: pointer;
+    transition: opacity 0.2s; align-items: start;
+  }
+  .article-item:first-child { border-top: 1px solid rgba(184,147,90,0.15); }
+  .article-item:hover { opacity: 0.65; }
+  .article-date { font-size: 0.72rem; letter-spacing: 0.08em; color: var(--gold); padding-top: 4px; line-height: 1.5; }
+  .article-title { font-family: var(--font-display); font-size: clamp(1.1rem,2.5vw,1.45rem); font-weight: 400; color: var(--ink); line-height: 1.3; margin-bottom: 6px; }
+  .article-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Article reader (iframe overlay) */
+  .article-reader {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(26,24,20,0.6); backdrop-filter: blur(4px);
+  }
+  .article-reader.open { display: flex; flex-direction: column; }
+  .reader-bar {
+    height: 52px; background: var(--white); display: flex; align-items: center;
+    justify-content: space-between; padding: 0 24px; flex-shrink: 0;
+    border-bottom: 1px solid rgba(184,147,90,0.2);
+  }
+  .reader-title { font-family: var(--font-display); font-size: 1rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+  .reader-actions { display: flex; gap: 12px; align-items: center; }
+  .reader-link { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--gold); text-decoration: none; text-transform: uppercase; }
+  .reader-close { width: 36px; height: 36px; background: none; border: 1px solid rgba(184,147,90,0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .reader-close svg { width: 16px; height: 16px; color: var(--ink); }
+  .reader-iframe { flex: 1; width: 100%; border: none; background: #fff; }
+
+  .loading-msg { text-align: center; padding: 60px 0; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.1em; }
+
+  footer { padding: 32px 40px; border-top: 1px solid rgba(184,147,90,0.15);
+    display: flex; justify-content: space-between; align-items: center; background: var(--cream); }
+  footer p { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; }
+  footer a { font-size: 0.75rem; color: var(--gold); text-decoration: none; letter-spacing: 0.1em; }
+
+  @media (max-width: 640px) {
+    nav { padding: 0 20px; }
+    .nav-tabs li button { padding: 6px 10px; font-size: 0.7rem; letter-spacing: 0.08em; }
+    .slideshow-label, .section-heading { padding-left: 20px; padding-right: 20px; }
+    .slide-caption { padding: 32px 20px 20px; }
+    .project-info { margin: 0 20px; }
+    .info-cell { border-right: none; padding-right: 0; }
+    .section-divider { margin: 0 20px 32px; }
+    .cv-container, .writing-container { padding: 48px 20px 60px; }
+    .cv-row { grid-template-columns: 80px 1fr; }
+    .article-item { grid-template-columns: 1fr; gap: 4px; }
+    .article-date { padding-top: 0; }
+    footer { flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">Lê Khoa</a>
+  <ul class="nav-tabs">
+    <li><button class="active" onclick="switchTab('projects',this)">Projects</button></li>
+    <li><button onclick="switchTab('cv',this)">CV</button></li>
+    <li><button onclick="switchTab('writing',this)">Blog</button></li>
+  </ul>
+</nav>
+
+<!-- ══ TAB 1: PROJECTS ══ -->
+<div id="tab-projects" class="tab-panel active">
+  <div class="slideshow-label">
+    <p class="eyebrow">Featured Project</p>
+    <h2>Royal Ninh Thuan<br>Premium Resort &amp; Residences</h2>
+  </div>
+  <div class="slideshow-wrapper" id="sw-main">
+    <div class="slide-controls">
+      <button class="slide-btn" onclick="moveSlide('main',-1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="slide-btn" onclick="moveSlide('main',1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="slideshow-track" id="track-main"></div>
+  </div>
+  <div class="slide-dots" id="dots-main"></div>
+
+  <div class="project-info">
+    <div class="info-cell">
+      <p class="info-label">Location</p>
+      <p class="info-value">Ninh Thuận, Vietnam</p>
+    </div>
+    <div class="info-cell">
+      <p class="info-label">Role</p>
+      <p class="info-value">Lead Architect<br><span style="color:var(--muted);font-size:0.82rem">Design Lead</span></p>
+    </div>
+    <div class="info-cell">
+      <p class="info-label">Team</p>
+      <p class="info-value">5 – 12 people</p>
+    </div>
+    <div class="info-cell">
+      <p class="info-label">Stage</p>
+      <p class="info-value">Schematic Design — Permitted<br>Construction Docs — Zone A1</p>
+    </div>
+    <div class="info-cell" style="grid-column:1/-1;border-right:none;padding-top:16px;">
+      <p class="info-label">Scope</p>
+      <ul class="scope-list">
+        <li>Hotel A1 — 170 rooms</li>
+        <li>Hotel A2 — 230 rooms</li>
+        <li>Hotel B — 100 rooms</li>
+        <li>71 villas — Zone A &nbsp;·&nbsp; 31 villas — Zone B</li>
+        <li>Administration &amp; reception buildings — Zone A &amp; B</li>
+        <li>Convention centre</li>
+        <li>Restaurants A1, A2, B &nbsp;·&nbsp; Spa A1, A2</li>
+        <li>Back-of-house facilities A &amp; B</li>
+        <li>Wastewater treatment plant</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="section-heading">
+    <p class="eyebrow">Selected Works</p>
+    <h3>Other Projects</h3>
+  </div>
+  <div style="margin-bottom:64px;">
+    <div class="slideshow-wrapper" id="sw-other">
+      <div class="slide-controls">
+        <button class="slide-btn" onclick="moveSlide('other',-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="slide-btn" onclick="moveSlide('other',1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="slideshow-track" id="track-other"></div>
+    </div>
+    <div class="slide-dots" id="dots-other"></div>
+  </div>
+
+  <footer>
+    <p>© 2025 Lê Khoa — Senior Architect, Đà Nẵng</p>
+    <a href="https://medium.com/@lekhoa-kts" target="_blank">Medium ↗</a>
+  </footer>
+</div>
+
+<!-- ══ TAB 2: CV ══ -->
+<div id="tab-cv" class="tab-panel">
+  <div class="cv-container">
+    <h1 class="cv-name">Lê Khoa</h1>
+    <p class="cv-title">Architect · Đà Nẵng, Vietnam</p>
+
+    <div class="cv-section">
+      <h3 class="cv-section-title">Contact</h3>
+      <p class="cv-plain">Da Nang City<br>
+        <a href="mailto:Lekhoa.kts@gmail.com" style="color:var(--gold);text-decoration:none">Lekhoa.kts@gmail.com</a><br>
+        0944 032 101</p>
+    </div>
+
+    <div class="cv-section">
+      <h3 class="cv-section-title">Education</h3>
+      <div class="cv-row">
+        <span class="cv-year">2006 – 2011</span>
+        <span class="cv-text">Bachelor of Architecture<br>Ho Chi Minh City University of Architecture</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2024 – 2034</span>
+        <span class="cv-text">Architect License (Chứng chỉ hành nghề kiến trúc)</span>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <h3 class="cv-section-title">Working Experience</h3>
+      <div class="cv-row">
+        <span class="cv-year">2012 – 2014</span>
+        <span class="cv-text">Architect — Loc Phuc Architecture, Sài Gòn</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2016 – 2018</span>
+        <span class="cv-text">Architect — Alinco Group, Sài Gòn</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2019 – 2020</span>
+        <span class="cv-text">TN Studio (Remote) — Melbourne, Australia</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2021 – 2022</span>
+        <span class="cv-text">Lead Architect — Alinco Group, Sài Gòn</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2022</span>
+        <span class="cv-text">Design Manager — Novaland Group, Sài Gòn</span>
+      </div>
+      <div class="cv-row">
+        <span class="cv-year">2022 – 2024</span>
+        <span class="cv-text">Lead Architect — GK Archi, Sài Gòn</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ TAB 3: WRITING ══ -->
+<div id="tab-writing" class="tab-panel">
+  <div class="writing-container">
+    
+    <div id="article-list" class="article-list">
+      <div class="loading-msg">Fetching articles…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ARTICLE READER (iframe overlay) ══ -->
+<div class="article-reader" id="article-reader">
+  <div class="reader-bar">
+    <div class="reader-title" id="reader-title"></div>
+    <div class="reader-actions">
+      <a class="reader-link" id="reader-link" href="#" target="_blank">Open in Medium ↗</a>
+      <button class="reader-close" onclick="closeReader()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <iframe class="reader-iframe" id="reader-iframe" src="" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+</div>
+
+<script>
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tabs button').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (name === 'writing' && !window._wLoaded) loadWriting();
+}
+
+// ── Slideshow (NO autoplay) ──
+var SS = {};
+
+function initSlideshow(id, slides) {
+  var track  = document.getElementById('track-' + id);
+  var dotsEl = document.getElementById('dots-' + id);
+  track.innerHTML = '';
+  dotsEl.innerHTML = '';
+
+  if (!slides || !slides.length) {
+    track.innerHTML = '<div class="slide"><div class="img-placeholder">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">' +
+      '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
+      '<polyline points="21 15 16 10 5 21"/></svg><span>No images found</span></div></div>';
+    SS[id] = {cur:0, total:1};
+    return;
+  }
+
+  slides.forEach(function(s, i) {
+    var div = document.createElement('div');
+    div.className = 'slide';
+    div.innerHTML =
+      '<img src="' + s.url + '" alt="' + s.name + '" loading="' + (i===0?'eager':'lazy') + '" ' +
+      'data-name="' + s.name + '" ' +
+      'onerror="this.outerHTML=\'<div class=\\\"img-placeholder\\\"><span>\'+this.dataset.name+\'</span></div>\'">' +
+      '<div class="slide-caption"><div class="slide-name">' + s.name + '</div></div>';
+    track.appendChild(div);
+
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i===0?' active':'');
+    (function(idx){ dot.onclick = function(){ goTo(id, idx); }; })(i);
+    dotsEl.appendChild(dot);
+  });
+
+  SS[id] = {cur:0, total:slides.length};
+  initSwipe(id);
+  // NO autoplay
+}
+
+function goTo(id, n) {
+  var s = SS[id]; if (!s) return;
+  s.cur = ((n % s.total) + s.total) % s.total;
+  document.getElementById('track-' + id).style.transform = 'translateX(-' + (s.cur*100) + '%)';
+  document.querySelectorAll('#dots-' + id + ' .dot').forEach(function(d,i){
+    d.classList.toggle('active', i === s.cur);
+  });
+}
+
+function moveSlide(id, dir) { if (SS[id]) goTo(id, SS[id].cur + dir); }
+
+function initSwipe(id) {
+  var el = document.getElementById('sw-' + id); if (!el) return;
+  var sx = 0;
+  el.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive:true});
+  el.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) moveSlide(id, dx < 0 ? 1 : -1);
+  }, {passive:true});
+}
+
+// ── GitHub image loading ──
+var GH_USER = 'Lkhoa', GH_REPO = 'portfolio-images', GH_BRANCH = 'main';
+
+async function loadGithubFolder(folder, slideshowId) {
+  var url = 'https://api.github.com/repos/' + GH_USER + '/' + GH_REPO + '/contents/' + folder;
+  try {
+    var res = await fetch(url, {headers:{'Accept':'application/vnd.github.v3+json'}});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var files = await res.json();
+    var images = files
+      .filter(function(f){ return /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name); })
+      .sort(function(a,b){ return a.name.localeCompare(b.name); })
+      .map(function(f){ return { url: f.download_url, name: f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ') }; });
+    initSlideshow(slideshowId, images);
+  } catch(e) {
+    console.warn('GitHub fetch:', e.message);
+    initSlideshow(slideshowId, null);
+  }
+}
+
+// ── Writing / Medium RSS → iframe reader ──
+// Static articles — always shown as fallback
+var STATIC_ARTICLES = [
+  {
+    title: 'GDP trên 10%? Vẫn là ngành BĐS.',
+    link: 'https://lekhoa-kts.medium.com/gdp-tr%C3%AAn-10-v%E1%BA%ABn-l%C3%A0-ng%C3%A0nh-b%C4%91s-c07b315b6e1a',
+    date: 'MAY 2025',
+    desc: 'Mục tiêu GDP trên 10% mà chính phủ đang đặt ra làm tui hơi hoang mang, vì chưa thấy cái nền để đỡ cho con số đó đứng vững.'
+  },
+  {
+    title: 'Những bằng chứng cho thấy thịt là thực phẩm chính và phù hợp nhất với loài người.',
+    link: 'https://lekhoa-kts.medium.com/b%E1%BA%B1ng-ch%E1%BB%A9ng-cho-th%E1%BA%A5y-th%E1%BB%8Bt-l%C3%A0-th%E1%BB%B1c-ph%E1%BA%A9m-ch%C3%ADnh-v%C3%A0-ph%C3%B9-h%E1%BB%A3p-nh%E1%BA%A5t-v%E1%BB%9Bi-lo%C3%A0i-ng%C6%B0%E1%BB%9Di-245052ef230c',
+    date: 'FEB 2025',
+    desc: 'Theo định nghĩa, loài ăn thịt có chế độ ăn tiêu thụ ít nhất 30% là thịt. Con người đã tiến hóa với chế độ ăn hầu hết là thịt trong hàng triệu năm.'
+  }
+];
+
+function renderArticles(articles, el) {
+  el.innerHTML = '';
+  articles.forEach(function(item) {
+    var row = document.createElement('div');
+    row.className = 'article-item';
+    row.innerHTML =
+      '<div class="article-date">' + item.date + '</div>' +
+      '<div><div class="article-title">' + item.title + '</div>' +
+      (item.desc ? '<div class="article-desc">' + item.desc + '</div>' : '') + '</div>';
+    row.onclick = (function(u,t){ return function(){ openReader(u,t); }; })(item.link, item.title);
+    el.appendChild(row);
+  });
+}
+
+async function loadWriting() {
+  window._wLoaded = true;
+  var el = document.getElementById('article-list');
+
+  // Show static articles immediately
+  renderArticles(STATIC_ARTICLES, el);
+
+  // Try multiple proxies in order
+  var proxies = [
+    'https://corsproxy.io/?' + encodeURIComponent('https://lekhoa-kts.medium.com/feed'),
+    'https://api.allorigins.win/get?url=' + encodeURIComponent('https://lekhoa-kts.medium.com/feed'),
+    'https://api.codetabs.com/v1/proxy?quest=https://lekhoa-kts.medium.com/feed',
+    'https://thingproxy.freeboard.io/fetch/https://lekhoa-kts.medium.com/feed'
+  ];
+
+  var xmlText = null;
+  for (var i = 0; i < proxies.length; i++) {
+    try {
+      var res = await fetch(proxies[i], {signal: AbortSignal.timeout(8000)});
+      if (!res.ok) continue;
+      var raw = await res.text();
+      // allorigins wraps in JSON {contents: "..."}
+      if (raw.trim().startsWith('{')) {
+        var json = JSON.parse(raw);
+        raw = json.contents || raw;
+      }
+      if (raw.includes('<item>') || raw.includes('<entry>')) { xmlText = raw; break; }
+    } catch(e) { continue; }
+  }
+
+  if (!xmlText) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted)">' +
+      '<p style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:12px">Articles from Medium</p>' +
+      '<a href="https://lekhoa-kts.medium.com" target="_blank" style="color:var(--gold);font-size:0.85rem">lekhoa-kts.medium.com ↗</a></div>';
+    return;
+  }
+
+  // Parse XML
+  var parser = new DOMParser();
+  var xml = parser.parseFromString(xmlText, 'text/xml');
+  var items = Array.from(xml.querySelectorAll('item'));
+  if (!items.length) items = Array.from(xml.querySelectorAll('entry'));
+
+  el.innerHTML = '';
+  items.forEach(function(item) {
+    var title = (item.querySelector('title') || {}).textContent || 'Untitled';
+    var link  = (item.querySelector('link') || {}).textContent
+             || (item.querySelector('link') ? item.querySelector('link').getAttribute('href') : '#');
+    var pubDate = (item.querySelector('pubDate') || item.querySelector('published') || {}).textContent || '';
+    var desc = (item.querySelector('description') || item.querySelector('summary') || item.querySelector('content') || {}).textContent || '';
+    desc = desc.replace(/<[^>]*>/g,'').trim().slice(0, 220);
+
+    var d = pubDate ? new Date(pubDate) : new Date();
+    var mon = d.toLocaleString('en',{month:'short'}).toUpperCase();
+    var yr  = d.getFullYear();
+
+    // Clean CDATA from title
+    title = title.replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+
+    var row = document.createElement('div');
+    row.className = 'article-item';
+    row.innerHTML =
+      '<div class="article-date">' + mon + '<br>' + yr + '</div>' +
+      '<div><div class="article-title">' + title + '</div>' +
+      (desc ? '<div class="article-desc">' + desc + '…</div>' : '') + '</div>';
+    row.onclick = (function(u, t){ return function(){ openReader(u, t); }; })(link.trim(), title);
+    el.appendChild(row);
+  });
+
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted)">' +
+      '<p style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:12px">No articles found</p></div>';
+  }
+}
+
+function openReader(url, title) {
+  window.open(url, '_blank');
+}
+
+function closeReader() {}
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', function() {
+  loadGithubFolder('1_Royal_Ninh-Thuan', 'main');
+  loadGithubFolder('2_Others', 'other');
+  setTimeout(function(){ if (!window._wLoaded) loadWriting(); }, 1200);
+});
+</script>
+</body>
+</html>
